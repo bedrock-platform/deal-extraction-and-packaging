@@ -21,7 +21,7 @@ This pipeline automates the entire lifecycle—from raw deal extraction and pack
 ## 💼 **Business Value & Outcomes**
 
 ### **Transparency & Supply Path Optimization**
-- **Reduced Shadow Spend:** Stage 1.5 verification (planned) will identify direct supply paths, reducing multiple "middleman" fees that inflate costs
+- **Reduced Shadow Spend:** Future verification enhancements will identify direct supply paths, reducing multiple "middleman" fees that inflate costs
 - **SPO Scoring:** Future verification layer will check `ads.txt` files to ensure buyers are purchasing from authorized sellers, not risky third-tier resellers
 
 ### **Efficiency Gains**
@@ -56,7 +56,7 @@ Different ad tech vendors speak different "languages" (schemas). This stage extr
 
 ### **Stage 1: Individual Deal Enrichment**
 
-Once data is unified, it is "enriched" using advanced AI (Google Gemini 2.5 Flash) to add semantic metadata. This stage uses **AI inference** to predict the deeper meaning of a deal beyond its name. (Note: Stage 1.5 will add **live verification** to validate these inferences against real-world data.)
+Once data is unified, it is "enriched" using advanced AI (Google Gemini 2.5 Flash) to add semantic metadata. This stage uses **AI inference** to predict the deeper meaning of a deal beyond its name.
 
 This stage adds critical fields such as:
 
@@ -92,7 +92,7 @@ This "multi-home" approach maximizes deal exposure to different buyer needs, ens
 
 #### **Constraint-Based Logic**
 
-While clustering is automated, it is **bounded by the "North Star" Taxonomy**—a curated list of package types that major demand-side platforms (DSPs) and advertisers expect to see (e.g., *High-Efficiency Performance, Live Sports & Enthusiasts, or Seasonal Shopping*). This ensures every package generated has a clear, recognizable market purpose and matches how real advertisers search in their DSPs.
+While clustering is automated, it is **bounded by industry-standard naming conventions**—a curated taxonomy of package types that major demand-side platforms (DSPs) and advertisers expect to see (e.g., *High-Efficiency Performance, Live Sports & Enthusiasts, or Seasonal Shopping*). This ensures every package generated has a clear, recognizable market purpose and matches how real advertisers search in their DSPs. The naming taxonomy is defined in `config/package_creation/naming_templates.json`.
 
 #### **LLM-Driven Naming & Auditing**
 
@@ -121,7 +121,7 @@ This auditing step ensures packages are **commercially viable** and **safe for b
 - Semantic embeddings created using `sentence-transformers` (all-MiniLM-L6-v2)
 - Adaptive clustering: ~25 deals per cluster (optimal for LLM processing)
 - GMM supports deal overlap strategy (deals can appear in multiple packages)
-- **LLM auditing integrated** into package proposal step (adds ~1-2 minutes to Stage 2, not a separate hours-long job)
+- **LLM auditing integrated** into package proposal step
 - Estimated output: 70-100 packages from 800+ deals
 
 ### **Stage 3: Health Scoring & Recommendations**
@@ -132,26 +132,6 @@ The final stage evaluates the quality of the newly created packages. It calculat
 - Aggregated metadata: taxonomy consensus, safety aggregation (worst-case), price ranges, volume sums
 - Health scoring algorithm evaluates package quality
 - LLM generates use case recommendations and buyer guidance
-
-### **Stage 1.5: Real-Time Verification Layer** (Planned)
-
-Moving beyond **static inference** (predicting based on deal metadata) to **dynamic verification** (validating against the live web). This upcoming enhancement adds real-time intelligence by verifying supply paths, auditing site quality, and ensuring compliance.
-
-#### **Supply Path Optimization (SPO)**
-- **ads.txt Verification:** Cross-references publisher domains against public `ads.txt` files to verify deals are sourced from direct, authorized sellers
-- **Shadow Spend Reduction:** Identifies when buyers are paying multiple "middleman" fees, enabling direct path optimization
-- **SPO Scoring:** Classifies deals as Direct (high), Authorized Reseller (medium), or Unknown (low) based on supply path validation
-
-#### **Site Quality Auditing**
-- **MFA Detection:** Uses **Gemini Vision** to audit site quality and detect Made-For-Advertising (MFA) sites—a top-of-mind concern for advertisers in 2026
-- **Visual Content Analysis:** Real-time publisher site crawling to verify content quality and brand safety
-- **E-E-A-T Scoring:** Authority scoring based on search visibility and content quality signals
-
-#### **Compliance Verification**
-- **Privacy Regulation Compliance:** Automated verification of GDPR/TCF 2.2 compliance and Consent Management Platform (CMP) versions
-- **Regulatory Alignment:** Flags non-compliant publishers for exclusion, ensuring deals meet latest privacy regulations
-
-**Status:** Stage 1.5 is planned for Phase 4, after Stage 2 (Package Creation) is operational. This allows focus on completing the essential pipeline (Stage 0→1→2→3) before adding verification enhancements.
 
 ---
 
@@ -169,14 +149,16 @@ To make deals easy to understand for buyers, the pipeline focuses on these prima
 
 ---
 
-## 🌟 **The "North Star" Taxonomy for Packaging**
+## 🌟 **Industry-Standard Package Naming Taxonomy**
 
-To ensure the pipeline generates commercially viable results, clustering is refined using categories that dominate the programmatic market:
+To ensure the pipeline generates commercially viable results, package naming follows industry-standard conventions that major demand-side platforms (DSPs) and advertisers expect. The naming taxonomy is defined in `config/package_creation/naming_templates.json` and includes:
 
 * **Performance & Outcomes:** Deals optimized for metrics like high viewability or click-through rates.
 * **Vertical-Specific:** Packages tailored for industries like Automotive, Financial Services, or CPG/Retail.
 * **Environment & Format:** Specialized bundles for **CTV (Connected TV)**, mobile apps, or high-impact video.
-* **Supply Path Optimization (SPO):** Packages that emphasize direct, transparent paths to premium publishers, reducing middleman fees.
+* **Quality Tiers:** Premium, Performance, Essential, and Verified prefixes that signal inventory quality and use case.
+
+The taxonomy ensures packages follow the format: `[Quality] [Vertical/Audience] [Format] Package` (e.g., "Premium Auto Intender CTV Package", "High-Efficiency Performance Deal"). This standardization makes packages instantly recognizable and searchable in DSPs.
 
 By automating this complex lifecycle, the pipeline ensures that inventory is not just "sold," but **curated** to meet the specific strategic goals of modern advertisers.
 
@@ -208,9 +190,9 @@ The pipeline ensures compliance with industry standards and regulations:
 - **Automatic Correction:** Fuzzy matching corrects LLM variations (e.g., "Automotive" vs. "Automotive & Vehicles")
 - **Backward Compatibility:** Supports v2.2 category names with automatic mapping to v3.1
 
-### **Privacy Regulations** (Planned in Stage 1.5)
-- **GDPR/TCF 2.2 Compliance:** Future verification layer will check Consent Management Platform (CMP) versions
+### **Privacy Regulations**
 - **Privacy-First Design:** Pipeline designed to work with first-party contextual signals, reducing reliance on third-party cookies
+- **Future Enhancements:** Planned verification layer will check Consent Management Platform (CMP) versions for GDPR/TCF 2.2 compliance
 
 ---
 
@@ -239,7 +221,7 @@ The pipeline architecture is designed to handle upcoming industry shifts:
 - **Carbon Footprint Metrics:** Future plans to incorporate "carbon footprint" or "ad-clutter" metrics into commercial profiles
 - **Efficiency Scoring:** Packages may include environmental impact scores to support green media initiatives
 
-### **Enhanced Verification** (Stage 1.5 - Phase 4)
+### **Enhanced Verification** (Future Enhancements)
 - **Real-Time Publisher Audits:** Live content analysis and risk assessment
 - **Market Intelligence Fusion:** Integration with external ad intelligence platforms for competitor spend tracking
 - **Performance Data Enrichment:** Historical performance metrics (CPA, conversion rates) to guide package recommendations
@@ -371,32 +353,26 @@ All files are saved to the `output/` directory with ISO 8601 timestamps:
 
 ```
 ┌─────────────────┐
-│  Stage 0:       │  Extract deals from multiple vendors
-│  Data Ingestion │  (Google Authorized Buyers, BidSwitch)
+│  Data Ingestion │  Extract deals from multiple vendors
 │  Unified Schema │  Normalize vendor differences
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│  Stage 1:        │  Enrich individual deals with AI
-│  Deal Enrichment │  (Taxonomy, Safety, Audience, Commercial)
-│  AI Inference    │  Google Gemini 2.5 Flash
+│  Deal Enrichment│  Enrich individual deals with AI
+│  AI Inference   │  (Taxonomy, Safety, Audience, Commercial)
 └────────┬────────┘
-         │
-         ├──► (Planned) ──┐
-         │                │
-         ▼                ▼
-┌─────────────────┐  ┌─────────────────┐
-│  Stage 2:        │  │  Stage 1.5:     │  (Planned - Phase 4)
-│  Package Creation│  │  Verification    │  ads.txt, SPO, MFA Detection
-│  GMM Clustering  │  │  Real-Time Truth │  Gemini Vision, Compliance
-└────────┬────────┘  └─────────────────┘
          │
          ▼
 ┌─────────────────┐
-│  Stage 3:        │  Score and recommend packages
-│  Package         │  (Health Scoring + Use Cases)
-│  Enrichment      │  LLM-generated recommendations
+│  Package        │  Group deals into buyer-ready packages
+│  Creation       │  GMM Clustering + LLM Naming
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Package        │  Score and recommend packages
+│  Enrichment     │  Health Scoring + Use Cases
 └─────────────────┘
 ```
 
@@ -424,12 +400,12 @@ deal-extraction-and-packaging/
 │   ├── common/              # Shared utilities and orchestrators
 │   ├── google_ads/          # Google Authorized Buyers integration
 │   ├── bidswitch/           # BidSwitch integration
-│   ├── enrichment/          # Stage 1: Deal enrichment
+│   ├── enrichment/          # Deal enrichment with AI
 │   │   ├── inference.py    # LLM inference logic
 │   │   ├── checkpoint.py   # Resume capability
 │   │   └── incremental_exporter.py  # Row-by-row persistence
-│   ├── package_creation/   # Stage 2: Package clustering
-│   └── package_enrichment/ # Stage 3: Package scoring
+│   ├── package_creation/   # Package clustering and creation
+│   └── package_enrichment/ # Package scoring and recommendations
 ├── config/
 │   └── enrichment/          # LLM prompt templates
 ├── data/
@@ -458,7 +434,7 @@ deal-extraction-and-packaging/
 - **Brand safety assurance** with GARM-compliant risk ratings
 - **Intelligent packaging** that groups related deals automatically
 - **Buyer-ready inventory** that can be activated immediately in DSPs
-- **Supply path transparency** (planned) to reduce shadow spend
+- **Supply path transparency** (future enhancements) to reduce shadow spend
 - **Quality filtering** that separates premium inventory from "junk" scale
 
 ### ROI & Business Impact
@@ -469,14 +445,14 @@ deal-extraction-and-packaging/
 - **Real-Time Visibility:** Incremental Google Sheets updates provide immediate insight into enrichment progress
 
 #### **Cost Optimization**
-- **Shadow Spend Reduction:** Stage 1.5 verification (planned) will identify direct supply paths, reducing multiple "middleman" fees
-- **Premium Inventory Focus:** "North Star" taxonomy filters out low-quality inventory, focusing spend on high-value deals
+- **Shadow Spend Reduction:** Future verification enhancements will identify direct supply paths, reducing multiple "middleman" fees
+- **Premium Inventory Focus:** Industry-standard taxonomy filters out low-quality inventory, focusing spend on high-value deals
 - **Reduced Manual Labor:** Automation eliminates need for dedicated deal review staff
 
 #### **Quality & Compliance**
 - **Consistent Categorization:** Validated against IAB v3.1 taxonomy (704 entries) with automatic correction
 - **Brand Safety Protection:** GARM-aligned risk ratings reduce brand reputation risk
-- **Regulatory Compliance:** Future verification layer ensures GDPR/TCF 2.2 compliance
+- **Regulatory Compliance:** Privacy-first design supports GDPR/TCF 2.2 compliance requirements
 
 #### **Buyer Experience**
 - **DSP-Ready Packages:** Packages match how advertisers search in their DSPs, reducing activation time
