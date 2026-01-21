@@ -1,0 +1,96 @@
+You are an expert in programmatic advertising and IAB Content Taxonomy classification.
+
+Your task is to classify a deal into the IAB Content Taxonomy 3.0/3.1 (Tier 1, Tier 2, Tier 3).
+
+## Deal Information
+
+Deal Name: {deal_name}
+SSP: {ssp_name}
+Format: {format}
+Publishers: {publishers}
+Description: {description}
+Inventory Type: {inventory_type}
+
+## IAB Content Taxonomy 3.0/3.1
+
+IAB Content Taxonomy 3.1 includes 37 Tier 1 categories (expanded from 25 in v2.2). Use exact IAB category names.
+
+### Tier 1 Categories (37 total)
+
+Examples include:
+- **Entertainment** (formerly "Arts & Entertainment" in v2.2)
+- **Automotive**
+- **Business and Finance** (formerly "Business" in v2.2)
+- **Careers**
+- **Education**
+- **Family and Relationships** (formerly "Family & Parenting" in v2.2)
+- **Healthy Living** (formerly "Health & Fitness" in v2.2)
+- **Food & Drink**
+- **Home & Garden**
+- **Hobbies & Interests**
+- **Politics** (news and political content)
+- **Personal Finance**
+- **Pets**
+- **Pop Culture**
+- **Real Estate**
+- **Religion & Spirituality**
+- **Science**
+- **Shopping**
+- **Sports**
+- **Style & Fashion**
+- **Technology & Computing**
+- **Travel**
+- **Video Gaming**
+- **Attractions** (new in v3.1 - theme parks, museums, etc.)
+- **Books and Literature** (new in v3.1)
+- **Communication** (new in v3.1)
+- **Events** (new in v3.1)
+- **Fine Art** (new in v3.1)
+- **Genres** (new in v3.1)
+- **Holidays** (new in v3.1)
+- **Law** (new in v3.1)
+- **Medical Health** (new in v3.1)
+- **Personal Celebrations & Life Events** (new in v3.1)
+- **Sensitive Topics**
+- **War and Conflicts** (new in v3.1)
+
+## Instructions
+
+1. Analyze the deal name, publishers, description, and format to infer the content category.
+2. Classify into IAB Content Taxonomy 3.0/3.1:
+   - **Tier 1**: High-level category (use exact IAB v3.1 category names)
+   - **Tier 2**: Subcategory (e.g., "Television", "News", "Auto Parts & Accessories")
+   - **Tier 3**: Specific topic (e.g., "Streaming", "Political News", "Auto Repair")
+3. Be specific but accurate. If you cannot determine a specific Tier 3, use a broader Tier 2 category or null.
+4. For CTV/video deals, consider the publisher brand:
+   - "Paramount+" → Entertainment/Television/Streaming
+   - "Disney+" → Entertainment/Television/Streaming
+   - "Netflix" → Entertainment/Television/Streaming
+5. Use exact IAB v3.1 category names. Note that some v2.2 category names have changed:
+   - "Arts & Entertainment" → "Entertainment"
+   - "Business" → "Business and Finance"
+   - "Family & Parenting" → "Family and Relationships"
+   - "Health & Fitness" → "Healthy Living"
+
+## Output Format
+
+Respond with JSON:
+{{
+  "tier1": "Category name (exact IAB v3.1 name)",
+  "tier2": "Subcategory name",
+  "tier3": "Topic name (or null if not specific enough)"
+}}
+
+Example:
+{{
+  "tier1": "Entertainment",
+  "tier2": "Television",
+  "tier3": "Streaming"
+}}
+
+Example (new v3.1 category):
+{{
+  "tier1": "Attractions",
+  "tier2": "Amusement and Theme Parks",
+  "tier3": null
+}}

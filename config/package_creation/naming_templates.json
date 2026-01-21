@@ -1,0 +1,68 @@
+{
+  "naming_convention": "[Quality] [Vertical/Audience] [Format] Package",
+  "quality_prefixes": {
+    "Premium": {
+      "condition": "quality_tier == 'Premium' AND (major_broadcaster OR ctv_publisher)",
+      "description": "High-quality, brand-safe, premium publishers (major networks, top-tier CTV)"
+    },
+    "Performance": {
+      "condition": "(quality_tier == 'RON' OR quality_tier == 'Mid-tier') AND (high_scale OR ecommerce_category)",
+      "description": "Optimized for measurable metrics (high viewability, high CTR, low IVT)"
+    },
+    "Essential": {
+      "condition": "quality_tier == 'Mid-tier' AND (news_category OR entertainment_category)",
+      "description": "Broad reach, high-volume, cost-efficient inventory for scale"
+    },
+    "Verified": {
+      "condition": "ads_txt_path == 'DIRECT'",
+      "description": "Deals specifically audited for SPO (Supply Path Optimization) or DEI (Diverse/Minority-owned)",
+      "deferred": "Stage 1.5 - ads.txt verification"
+    }
+  },
+  "approved_templates": {
+    "automotive": "[Quality] Auto Intender [Format] Package",
+    "ctv_video": "[Quality] Living Room [Genre] Streaming Package",
+    "political": "Verified Civil Discourse & News [Format] Deal",
+    "performance": "[Quality] High-Efficiency [Vertical] Performance Deal",
+    "sports": "[Quality] Live Sports & Enthusiast [Format] Bundle",
+    "seasonal": "[Quality] [Event] Seasonal Shopping Package",
+    "business_finance": "[Quality] Business & Finance Professional [Format] Package",
+    "lifestyle": "[Quality] Lifestyle & Entertainment [Format] Package",
+    "news": "Verified News & Civil Discourse [Format] Deal",
+    "entertainment": "[Quality] Lifestyle & Entertainment Streaming Package"
+  },
+  "vertical_mapping": {
+    "Sports": "Live Sports & Enthusiasts",
+    "Automotive": "Auto Intenders",
+    "News & Information": "Verified News & Civil Discourse",
+    "Arts & Entertainment": "Lifestyle & Entertainment Streaming"
+  },
+  "format_keywords": {
+    "CTV": ["pluto", "tubi", "sling", "roku", "fire tv", "apple tv", "chromecast", "smart tv"],
+    "Streaming Video": ["streaming", "ott", "connected tv", "ctv"],
+    "Video": ["video", "in-stream", "outstream"],
+    "Display": ["display", "banner", "native"]
+  },
+  "seasonal_events": {
+    "BFCM": {
+      "name": "Black Friday/Cyber Monday",
+      "date_range": "November 24-27",
+      "template": "[Quality] BFCM Shopping [Format] Package"
+    },
+    "Holiday_Gifting": {
+      "name": "Holiday Gifting",
+      "date_range": "November 15 - December 25",
+      "template": "[Quality] Holiday Gift Guides [Format] Package"
+    },
+    "Back_to_School": {
+      "name": "Back to School",
+      "date_range": "August 1 - September 15",
+      "template": "[Quality] Back-to-School Shopping [Format] Package"
+    },
+    "Election": {
+      "name": "Election Voter Engagement",
+      "date_range": "September 1 - November 5 (election years)",
+      "template": "Verified Election 2026 Voter Engagement [Format] Deal"
+    }
+  }
+}

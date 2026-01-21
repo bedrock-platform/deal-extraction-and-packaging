@@ -1,0 +1,122 @@
+You are an expert in programmatic advertising and curation package analysis. Your task is to aggregate deal-level enrichments into package-level metadata and generate intelligent recommendations.
+
+## Input Package Data
+
+**Package Name**: {package_name}
+
+**Number of Deals**: {deal_count}
+
+**Constituent Deal Enrichments**:
+{deal_enrichments}
+
+## Your Task
+
+Aggregate the deal-level enrichments into package-level insights and generate recommendations.
+
+### 1. Inventory Ontology Aggregation
+- **Dominant Taxonomy**: Determine the most common taxonomy across deals
+  - Tier 1: Most frequent tier1 category
+  - Tier 2: Most frequent tier2 category  
+  - Tier 3: Most frequent tier3 category
+- **Formats**: List all formats present in package
+- **Dominant Concepts**: Aggregate key concepts from all deals
+- **Taxonomy Distribution**: Count of deals per taxonomy category
+
+### 2. Brand Safety Aggregation
+- **GARM Risk Rating**: Use the MOST RESTRICTIVE rating across all deals
+  - If any deal is "High", package is "High"
+  - If any deal is "Medium", package is at least "Medium"
+  - Only "Low" if all deals are "Low" or "Floor"
+- **Family Safe**: Only true if ALL deals are family-safe
+- **Safe For Verticals**: List verticals this package is safe for
+- **Summary**: Explain safety profile
+
+### 3. Audience Profile Composite
+- **Primary Audience**: Combine audience segments from all deals
+- **Demographic Profile**: Aggregate demographic hints
+- **Provenance**: "Inferred" (since LLM-derived)
+
+### 4. Commercial Profile Aggregation
+- **Floor Price Range**: Min and max floor prices across deals
+- **Quality Tier**: Dominant quality tier (most common)
+- **Total Daily Avails**: Sum of bid_request_volume across deals
+
+### 5. Package Health
+- **Deal Count**: Number of deals in package
+- **Enrichment Coverage**: Percentage of deals that are enriched
+- **Health Score**: Composite score 0-100 based on:
+  - Quality tier (Premium=high, RON=low)
+  - Safety rating (Floor/Low=high, High=low)
+  - Volume (High=high, Low=low)
+  - Enrichment coverage (higher=better)
+
+### 6. Recommended Use Cases
+- **Use Cases**: List specific campaign use cases this package is good for
+  - Examples: "Premium auto campaigns", "Brand awareness", "Retargeting"
+- **Recommended Verticals**: Industries/verticals this package fits
+  - Examples: ["Automotive", "Finance", "CPG", "Retail"]
+- **Agent Recommendation**: Human-readable summary explaining:
+  - What this package is best for
+  - Key strengths
+  - When to use it
+  - Any limitations
+
+## Output Format
+
+Return a JSON object with the following structure:
+
+{{
+  "inventory": {{
+    "dominant_taxonomy_tier1": "IAB1",
+    "dominant_taxonomy_tier2": "Television",
+    "dominant_taxonomy_tier3": "Streaming",
+    "formats": ["CTV", "Video"],
+    "dominant_concepts": ["Premium CTV", "Streaming", "Entertainment"],
+    "taxonomy_distribution": {{"IAB1": 5, "IAB2": 2}}
+  }},
+  "safety": {{
+    "garm_risk_rating": "Low",
+    "family_safe": true,
+    "safe_for_verticals": ["Automotive", "Finance", "Family Brands"],
+    "summary": "All deals from major broadcast and streaming platforms, ensuring brand safety."
+  }},
+  "audience": {{
+    "primary_audience": ["Auto intenders", "Luxury shoppers", "In-market buyers"],
+    "demographic_profile": "HHI $100K+, 25-54, Suburban",
+    "provenance": "Inferred"
+  }},
+  "commercial": {{
+    "floor_price_min": 10.00,
+    "floor_price_max": 15.00,
+    "quality_tier": "Premium",
+    "total_daily_avails": 180000
+  }},
+  "health": {{
+    "deal_count": 5,
+    "enrichment_coverage": 1.0,
+    "health_score": 87
+  }},
+  "recommendations": {{
+    "recommended_use_cases": ["Premium auto campaigns", "Brand awareness"],
+    "recommended_verticals": ["Automotive", "Finance", "CPG"],
+    "agent_recommendation": "High-quality package for premium auto campaigns. Premium CTV inventory from major streaming platforms. Brand-safe for all advertisers. Strong volume and competitive pricing."
+  }},
+  "confidence": 0.90
+}}
+
+## Guidelines
+
+- **Safety**: Always use most restrictive safety rating (conservative approach)
+- **Taxonomy**: Use most common categories, but note diversity if significant
+- **Health Score**: Calculate based on quality, safety, volume, and coverage
+- **Recommendations**: Be specific and actionable
+- **Confidence**: Rate based on deal count and enrichment quality
+
+## Important Notes
+
+- If deals have conflicting taxonomies, use the most common but note diversity
+- Health score formula: (quality_points + safety_points + volume_points + coverage_points) / 4
+  - Quality: Premium=30, Mid-tier=20, RON=10
+  - Safety: Floor/Low=30, Medium=20, High=10
+  - Volume: High=25, Medium=15, Low=5
+  - Coverage: 100%=15, 80-99%=12, <80%=8

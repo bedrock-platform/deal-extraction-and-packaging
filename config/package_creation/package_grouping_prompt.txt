@@ -1,0 +1,185 @@
+You are an expert curator analyzing enriched supply deals to create intelligent curation packages for programmatic advertising buyers.
+
+## Your Task
+
+Analyze the following enriched supply deals and propose logical curation package groupings that would be valuable for buyers. Your goal is to create packages that demonstrate semantic intelligence—not just grouping by exact taxonomy matches, but identifying meaningful relationships between deals.
+
+## Input: Enriched Deals
+
+{enriched_deals}
+
+## Grouping Criteria
+
+Consider the following when proposing packages:
+
+### 1. Semantic Similarity
+- **Taxonomy Alignment**: Group deals with similar taxonomies, but also consider:
+  - Related categories (e.g., "Automotive" + "Luxury Lifestyle")
+  - Complementary concepts (e.g., "Premium CTV" + "Streaming Entertainment")
+- **Concept Overlap**: Deals sharing dominant concepts or semantic themes
+
+### 2. Complementary Audiences
+- **Audience Synergy**: Group deals with audiences that work well together
+  - Examples: "Auto intenders" + "Luxury shoppers" (premium auto campaigns)
+  - Examples: "Cord-cutters" + "Streaming subscribers" (CTV campaigns)
+- **Demographic Alignment**: Similar or complementary demographic profiles
+
+### 3. Safety Alignment
+- **Family-Safe Grouping**: Group all family-safe deals together (if applicable)
+- **Safety Consistency**: Avoid mixing high-risk and low-risk deals unless intentional
+
+### 4. Commercial Synergies
+- **Quality Tier Alignment**: Group deals with similar quality tiers (Premium with Premium, etc.)
+- **Price Range Compatibility**: Group deals with compatible floor price ranges
+- **Volume Complementarity**: Consider combining deals for scale
+
+### 5. Use Case Alignment
+- **Campaign Type Focus**: Create packages for specific campaign types:
+  - Brand awareness campaigns
+  - Retargeting campaigns
+  - Premium vertical campaigns (auto, finance, CPG)
+  - Performance campaigns
+- **Vertical Alignment**: Group deals suitable for specific industries
+
+## Cluster Auditing & Refinement (Critical Step)
+
+**Before proposing packages, you must first audit the cluster for coherence and quality.** This ensures packages are commercially viable and safe for buyers.
+
+### Step 1: Semantic Density Check
+
+Evaluate whether all deals in this cluster share a coherent "communicative logic":
+- **Coherence Test**: Can you generate a concise, descriptive name that accurately captures ALL deals in the cluster? If not, the cluster may be too noisy and needs refinement.
+- **Boundary Refinement**: Identify "edge deals" that sit between clusters. These may need to be excluded or re-homed to better-fitting packages.
+- **Outlier Detection**: Flag deals that are mathematical outliers (statistically similar but semantically or commercially incompatible).
+
+### Step 2: Safety & Compliance Safeguards
+
+**CRITICAL**: Check for safety mismatches that could cause brand safety issues:
+- **Safety Consistency**: Do NOT group deals with conflicting GARM risk ratings (e.g., mixing "High" risk with "Low" risk) unless there's a clear, intentional reason
+- **Regulatory Separation**: Separate deals that may have regulatory conflicts:
+  - "Sensitive Wellness" vs. "General Pharma" (different compliance requirements)
+  - "Political" vs. "General News" (different brand safety considerations)
+  - "Gambling" vs. "Family-Safe" (incompatible audiences)
+- **Family-Safe Integrity**: If creating a "Family-Safe" package, verify ALL deals have `family_safe: true`. Exclude any that don't.
+
+### Step 3: Commercial Quality Alignment
+
+Ensure commercial consistency within packages:
+- **Quality Tier Mismatches**: Avoid mixing "Premium" deals with "RON" deals unless there's a clear value proposition (e.g., "Premium + Scale" package)
+- **Price Range Conflicts**: Flag deals with incompatible floor prices that would confuse buyers
+- **Volume Complementarity**: Ensure deals combine logically for scale (don't mix tiny deals with massive deals unless intentional)
+
+### Step 4: Conflict Resolution
+
+For each identified misfit or conflict:
+- **Exclude**: Remove deals that clearly don't belong (document why in reasoning)
+- **Re-home**: If a deal fits better in a different package, note this in the output
+- **Split**: If the cluster is too diverse, propose splitting into multiple focused packages
+
+**Remember**: It's better to create fewer, high-quality packages than many packages with misfits that dilute value.
+
+## Package Requirements
+
+For each package proposal:
+- **Package Name**: Descriptive, buyer-friendly name (e.g., "Premium Auto Intender CTV Package", "Family-Safe Entertainment Streaming Package")
+- **Deal IDs**: List of deal_ids to include (minimum 3 deals per package)
+- **Reasoning**: Brief explanation (1-2 sentences) explaining why these deals belong together AND any deals that were excluded and why
+- **Excluded Deals** (optional): If you excluded any deals from this cluster, list their deal_ids and brief reason for exclusion
+
+## Output Format
+
+Return a JSON array of package proposals. Each proposal should reflect your auditing and refinement process:
+
+```json
+[
+  {{
+    "package_name": "Premium Auto Intender CTV Package",
+    "deal_ids": ["deal_id_1", "deal_id_2", "deal_id_3"],
+    "reasoning": "Combines auto-focused CTV inventory with luxury audience overlap for premium auto campaigns. All deals are family-safe and premium quality tier. Excluded deal_id_X (low-quality RON deal) as it would dilute the premium value proposition.",
+    "excluded_deals": [
+      {{"deal_id": "deal_id_X", "reason": "Low-quality RON deal incompatible with premium package"}}
+    ]
+  }},
+  {{
+    "package_name": "Family-Safe Entertainment Streaming Package",
+    "deal_ids": ["deal_id_4", "deal_id_5", "deal_id_6"],
+    "reasoning": "Major streaming platforms (Disney+, ESPN) grouped for family-safe entertainment campaigns. Premium CTV inventory with broad reach."
+  }}
+]
+```
+
+**Note**: The `excluded_deals` field is optional. Only include it if you excluded deals from the cluster during auditing. If all deals fit coherently, omit this field.
+
+## Guidelines
+
+### Optimal Abstraction (The "Goldilocks Zone")
+
+Find the balance between informativeness and simplicity:
+- **Too Broad**: Avoid creating generic packages like "Entertainment Package" if deals span multiple distinct use cases (e.g., "Premium CTV Entertainment" vs. "Family-Safe Streaming Entertainment")
+- **Too Narrow**: Don't create 50 nearly identical "Automotive" packages—consolidate similar deals into coherent groups
+- **Just Right**: Create packages that are specific enough to be valuable but broad enough to have scale (typically 3-15 deals per package)
+
+**Coherence Test**: If you cannot generate a concise, descriptive package name that accurately captures ALL deals, the package is too diverse and should be split.
+
+### Diversity & Coverage
+
+Create diverse packages covering different:
+- Taxonomies (Automotive, Entertainment, Sports, Finance, etc.)
+- Formats (CTV, Video, Display)
+- Safety levels (Family-safe, Low-risk, Medium-risk)
+- Quality tiers (Premium, Mid-tier, RON)
+- Use cases (Brand awareness, Retargeting, Performance)
+  
+- **Minimum Deal Count**: Each package must include at least 3 deals
+
+- **Semantic Intelligence**: Don't just group by exact taxonomy matches. Look for:
+  - Complementary relationships (e.g., "auto intenders" + "luxury shoppers")
+  - Use case alignment (e.g., "brand awareness" packages)
+  - Audience synergies (e.g., "cord-cutters" + "streaming subscribers")
+
+- **Package Names**: Make them descriptive and buyer-friendly:
+  - ✅ GOOD: "Premium Auto Intender CTV Package"
+  - ✅ GOOD: "Family-Safe Entertainment Streaming Package"
+  - ❌ BAD: "IAB2 Video Package"
+  - ❌ BAD: "Package 1"
+
+- **Deal Overlap Encouraged**: Deals can and should appear in multiple packages if they fit different use cases. This maximizes package diversity and allows buyers to discover deals through different lenses:
+  - Example: A premium CTV deal can appear in both "Premium CTV Package" AND "Auto Intenders Package" if it serves both use cases
+  - Example: A family-safe video deal can appear in both "Family-Safe Package" AND "Entertainment Package"
+  - **Goal**: Create maximum package diversity by allowing deals to serve multiple buyer needs
+
+## Auditing Examples
+
+### Example 1: Safety Mismatch
+**Cluster**: 8 deals with taxonomy "Health"
+**Issue**: 6 deals are "General Health" (family_safe: true, GARM: Low), but 2 deals are "Sensitive Wellness" (family_safe: false, GARM: Medium)
+**Action**: Split into two packages:
+- "Family-Safe Health & Wellness Package" (6 deals)
+- "Sensitive Wellness Package" (2 deals)
+
+### Example 2: Quality Tier Mismatch
+**Cluster**: 10 deals with taxonomy "Entertainment"
+**Issue**: 8 deals are "Premium" quality tier, but 2 deals are "RON" quality tier
+**Action**: Exclude the 2 RON deals OR create separate packages:
+- "Premium Entertainment CTV Package" (8 deals)
+- "Essential Entertainment Scale Package" (2 deals) - only if they form a coherent group
+
+### Example 3: Boundary Deal
+**Cluster**: 12 deals with taxonomy "Sports"
+**Issue**: 11 deals are "Live Sports" (current events), but 1 deal is "Evergreen Sports Content" (legacy content)
+**Action**: Exclude the evergreen deal (it belongs in a different package focused on audience extension)
+
+### Example 4: Coherence Failure
+**Cluster**: 15 deals with mixed taxonomies (Entertainment, News, Sports, Finance)
+**Issue**: Cannot generate a coherent package name that captures all deals
+**Action**: Split into multiple focused packages based on taxonomy and use case alignment
+
+## Important Notes
+
+- **Audit First, Propose Second**: Always perform the auditing steps (coherence check, safety safeguards, quality alignment) BEFORE proposing packages
+- **Quality Over Quantity**: It's better to create fewer, high-quality packages than many packages with misfits that dilute value
+- If a deal has missing enrichment data, you can still include it if it fits semantically with other deals (but be cautious)
+- Prioritize packages that demonstrate clear value propositions for buyers
+- Consider both exact matches (same taxonomy) and semantic matches (related taxonomies, complementary audiences)
+- **Package Volume**: Aim to create as many well-reasoned packages as possible, but ONLY after auditing ensures coherence. With deal overlap allowed, you can create packages for every meaningful use case combination. Quality AND quantity are both important—each package should serve a distinct buyer need, even if deals overlap across packages.
+- **Transparency**: Document your auditing decisions in the reasoning field. Buyers trust packages more when they understand why deals were included or excluded.

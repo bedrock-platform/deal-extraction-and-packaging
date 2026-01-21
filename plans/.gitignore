@@ -1,0 +1,36 @@
+# Environment variables
+.env
+../.env
+
+# Auth credentials
+../auth/bedrock-us-east-e94069e89afa.json
+
+# Output files
+../output/*
+!../output/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+**/.DS_Store
+
+# Logs
+*.log

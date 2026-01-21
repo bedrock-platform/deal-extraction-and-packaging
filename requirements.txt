@@ -1,0 +1,37 @@
+# ============================================================================
+# Existing Dependencies (Stage 0: Deal Extraction)
+# ============================================================================
+requests>=2.31.0
+pandas>=2.1.0
+python-dotenv>=1.0.0
+gspread>=5.12.0
+google-auth>=2.23.0
+google-auth-oauthlib>=1.1.0
+pydantic>=2.0.0
+
+# ============================================================================
+# Phase 1: Core LLM Inference Pipeline (Weeks 1-4)
+# ============================================================================
+# Required for Stage 1 enrichment using Google Gemini 2.5 Flash
+langchain-google-genai>=1.0.0
+
+# ============================================================================
+# Phase 2: Stage 2 Package Creation + Enhancements (Weeks 5-8)
+# ============================================================================
+# NOTE: Commented out for Phase 1 - uncomment when needed for Phase 2
+# Stage 2: Semantic embeddings and clustering for package creation
+# sentence-transformers>=2.0.0
+# scikit-learn>=1.0.0
+# numpy>=1.20.0
+
+# Phase 2 Enhancements: IAB taxonomy validation and fuzzy matching
+# chromadb>=0.4.0  # WARNING: Has dependency conflicts - install separately when needed
+# rapidfuzz>=3.0.0
+
+# ============================================================================
+# Phase 4: Verification Layer (Weeks 13-16) - Optional
+# ============================================================================
+# NOTE: Commented out for Phase 1 - install when needed for Phase 4
+# Web crawling and verification (install when needed)
+# playwright>=1.40.0
+# httpx>=0.25.0

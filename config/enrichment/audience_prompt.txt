@@ -1,0 +1,38 @@
+You are an expert in programmatic advertising audience segmentation and demographic analysis.
+
+Your task is to infer the target audience profile for a deal based on available signals.
+
+## Deal Information
+
+Deal Name: {deal_name}
+SSP: {ssp_name}
+Format: {format}
+Publishers: {publishers}
+Description: {description}
+Inventory Type: {inventory_type}
+Taxonomy: {taxonomy}
+
+## Instructions
+
+1. Analyze the deal to infer audience segments:
+   - Publisher brand signals (e.g., "Paramount+" → Entertainment enthusiasts)
+   - Content taxonomy (e.g., "Automotive" → Auto intenders)
+   - Format (e.g., CTV → Household decision-makers)
+   - Deal name keywords (e.g., "Premium" → High-income)
+2. Generate 2-5 audience segments that best describe the target audience.
+3. Provide demographic hints (age range, income level, interests) if inferable.
+4. Be specific but realistic based on available signals.
+
+## Output Format
+
+Respond with JSON:
+{{
+  "inferred_audience": ["Segment1", "Segment2", "Segment3"],
+  "demographic_hint": "Age range, Income level, Interests (or null if not inferable)"
+}}
+
+Example:
+{{
+  "inferred_audience": ["Auto Intenders", "Luxury Shoppers", "Tech Enthusiasts"],
+  "demographic_hint": "25-54, High Income, Tech-Savvy"
+}}

@@ -1,0 +1,127 @@
+You are an expert in programmatic advertising deal analysis and semantic enrichment.
+
+Your task is to comprehensively analyze a deal and provide all semantic metadata in a single response:
+1. IAB Content Taxonomy classification (Tier 1, Tier 2, Tier 3)
+2. Brand safety assessment (GARM risk rating, family-safe status)
+3. Audience profile inference (segments, demographics)
+4. Commercial profile assessment (quality tier, volume tier)
+5. Semantic concepts extraction (key keywords and themes)
+
+## Deal Information
+
+Deal Name: {deal_name}
+SSP: {ssp_name}
+Format: {format}
+Publishers: {publishers}
+Description: {description}
+Inventory Type: {inventory_type}
+Floor Price: ${floor_price}
+Volume Metrics: {volume_metrics}
+
+## Enhanced Context (Phase 2)
+
+{publisher_context}
+{temporal_context}
+
+## Instructions
+
+### 1. IAB Content Taxonomy Classification
+- Analyze the deal name, publishers, description, and format to infer the content category
+- Classify into IAB Content Taxonomy 2.2:
+  - Tier 1: High-level category (e.g., "Automotive", "Arts & Entertainment", "News & Information")
+  - Tier 2: Subcategory (e.g., "Auto Parts & Accessories", "Television", "News")
+  - Tier 3: Specific topic (e.g., "Auto Repair", "Streaming", "Breaking News")
+- Be specific but accurate. If you cannot determine a specific Tier 3, use a broader Tier 2 category
+- For CTV/video deals, consider the publisher brand (e.g., "Paramount+" → Entertainment/Television/Streaming)
+
+### 2. Brand Safety Assessment (GARM)
+- Assess brand safety based on:
+  - Publisher reputation (recognized brands = safer)
+  - Inventory type (CTV typically safer than open web)
+  - Floor price (higher floor often indicates premium inventory)
+  - Deal name and description (premium keywords = safer)
+- Determine family-safe status:
+  - **CRITICAL RULE**: Default to True for mainstream news publishers (Yahoo, CNN, BBC, Reuters, New York Post, etc.) even if covering politics
+  - **True**: Suitable for all audiences, including children
+    - Mainstream news coverage (including politics, current events) from reputable publishers
+    - General entertainment, lifestyle, and educational content
+    - Established publishers (Yahoo, CNN, BBC, Reuters, New York Post, etc.) covering news/politics should ALWAYS be True
+    - Only extremist, violent, or explicit content disqualifies family-safe status
+    - **Examples of True**: Yahoo ROS, CNN News, BBC News, New York Post Network - these are mainstream publishers and should be True even with "Politics" taxonomy
+  - **False**: May contain adult content, mature themes, or extremist/controversial content
+    - Explicit adult content, graphic violence, hate speech
+    - Extremist political content (NOT mainstream news coverage)
+    - User-generated content platforms with unmoderated controversial content
+  - **IMPORTANT**: Do NOT mark as False simply because taxonomy includes "Politics". Mainstream news publishers covering political topics should be True unless there's evidence of extremist, violent, or explicit content.
+  - **Publisher Recognition**: If publisher is Yahoo, CNN, BBC, Reuters, New York Post, or similar mainstream news brand, family_safe MUST be True regardless of taxonomy.
+- Assign GARM risk rating:
+  - **Floor**: Highest brand safety (premium, verified publishers, family-safe)
+  - **Low**: Low risk (reputable publishers, standard content, mainstream news)
+  - **Medium**: Moderate risk (some user-generated content, less verified)
+  - **High**: High risk (unverified, potentially unsafe content)
+- List safe-for verticals (e.g., ["Automotive", "Finance", "Retail"]) based on risk rating
+
+### 3. Audience Profile Inference
+- Analyze the deal to infer audience segments:
+  - Publisher brand signals (e.g., "Paramount+" → Entertainment enthusiasts)
+  - Content taxonomy (e.g., "Automotive" → Auto intenders)
+  - Format (e.g., CTV → Household decision-makers)
+  - Deal name keywords (e.g., "Premium" → High-income)
+- Generate 2-5 audience segments that best describe the target audience
+- Provide demographic hints (age range, income level, interests) if inferable
+- Be specific but realistic based on available signals
+
+### 4. Commercial Profile Assessment
+- Assess quality tier based on:
+  - Publisher reputation (recognized brands = Premium)
+  - Floor price (higher floor often indicates premium)
+  - Inventory type (CTV typically Premium)
+  - Deal name keywords ("Premium", "Curated" = Premium)
+- Quality tier options: **Premium**, **Mid-tier**, **RON**
+- Assess volume tier based on:
+  - Volume metrics if provided (bid_requests, impressions)
+  - Publisher size (major networks = High volume)
+  - Inventory type (CTV = High volume typically)
+- Volume tier options: **High**, **Medium**, **Low**
+- If volume metrics are not available, infer from publisher reputation and inventory type
+
+### 5. Semantic Concepts Extraction
+- Extract 3-8 key semantic concepts/keywords that best describe this deal
+- Focus on:
+  - **Format/Inventory Type**: CTV, Video, Display, Mobile, Desktop, Native, Audio
+  - **Quality Indicators**: Premium, Brand-Safe, Verified, Curated, RON
+  - **Geographic**: US, International, Regional markets
+  - **Content Themes**: News, Sports, Entertainment, Shopping, etc.
+  - **Audience Signals**: Political, Family-Safe, Gaming, etc.
+  - **Technical**: Programmatic, Direct, Reseller, etc.
+- Be concise: single words or short phrases (2-3 words max)
+- Examples: ["CTV", "Premium", "US Market", "News", "Brand-Safe"], ["Video", "Mobile", "Gaming", "Gen Z"]
+- Do NOT include generic terms like "Advertising" or "Deal"
+- Prioritize distinctive characteristics that differentiate this deal
+
+## Output Format
+
+Respond with JSON containing all enrichment fields:
+
+{{
+  "taxonomy": {{
+    "tier1": "Category name",
+    "tier2": "Subcategory name",
+    "tier3": "Topic name (or null if not specific enough)"
+  }},
+  "safety": {{
+    "garm_risk_rating": "Floor|Low|Medium|High",
+    "family_safe": true|false,
+    "safe_for_verticals": ["Vertical1", "Vertical2", ...]
+  }},
+  "audience": {{
+    "inferred_audience": ["Segment1", "Segment2", "Segment3"],
+    "demographic_hint": "Age range, Income level, Interests (or null if not inferable)"
+  }},
+  "commercial": {{
+    "quality_tier": "Premium|Mid-tier|RON",
+    "volume_tier": "High|Medium|Low",
+    "floor_price": {floor_price}
+  }},
+  "concepts": ["Concept1", "Concept2", "Concept3", ...]
+}}
