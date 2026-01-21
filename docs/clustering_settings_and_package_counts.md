@@ -8,66 +8,6 @@ Stage 2 (Package Creation) uses semantic clustering to group similar deals, then
 
 ---
 
-## ⚠️ Known Issues
-
-### Missing `deal_ids` Column in Stage 3 Output
-
-**Issue**: The `deal_ids` column from Stage 2 packages is not being included in Stage 3 enriched package output.
-
-**Current State**: The `deal_ids` field exists in Stage 2 packages but is not preserved when packages are enriched in Stage 3.
-
-**Impact**:
-- Stage 2 packages include `deal_ids` (list of deal IDs in the package)
-- Stage 3 enriched packages are missing this field
-
-**Action Needed**: Ensure `deal_ids` from Stage 2 packages is preserved and included in Stage 3 enriched package output (both JSON/JSONL files and Google Sheets).
-
-**Workaround**: 
-- Export Stage 2 packages to get `deal_ids`
-- Manually match packages by `package_name` or other identifier
-- Add `deal_ids` column to Stage 3 enriched packages spreadsheet
-
----
-
-### "Excluded Deals" Packages in Stage 2
-
-**Design Decision**: Stage 2 creates "Excluded Deals" packages to document deals that couldn't be packaged.
-
-**What They Are**:
-- Packages with **empty `deal_ids` arrays** (no actual deals)
-- Created by the LLM during package creation to document excluded deals
-- Contain metadata about why deals were excluded (safety mismatches, quality conflicts, insufficient scale, etc.)
-
-**Why They Exist**:
-- **Transparency**: Buyers can see which deals were excluded and why
-- **Audit Trail**: Documents deals that didn't meet package requirements (minimum 3 deals, safety alignment, quality consistency)
-- **Accountability**: Shows the curation process is thorough and documented
-
-**Examples**:
-- "Excluded Deals (Safety & Coherence Mismatch)" - deals with safety conflicts
-- "Excluded Deals" - deals that didn't meet minimum package requirements
-- "Excluded Deals - Geographic & Volume Outliers" - deals that were geographic/volume outliers
-
-**Stage 3 Behavior**:
-- These packages are **automatically skipped** during Stage 3 enrichment
-- Reason: They have no deals to enrich (empty `deal_ids` array)
-- Location: Skipped in `src/integration/stage3_adapter.py` (packages with no matched deals are filtered out)
-
-**Impact**:
-- Stage 2 output: Includes all packages (including "Excluded Deals" packages)
-- Stage 3 output: Only includes packages with actual deals (excludes "Excluded Deals" packages)
-- Result: Stage 3 package count will be lower than Stage 2 if excluded deals packages exist
-
-**This is Expected Behavior**: The system is designed to:
-1. Document excluded deals in Stage 2 for transparency
-2. Skip them in Stage 3 since there's nothing to enrich
-
-**If You Need Excluded Deals in Stage 3**:
-- Use the backfill script: `scripts/backfill_excluded_deals.py`
-- This exports excluded deals packages with minimal enrichment (no LLM call needed)
-
----
-
 ## Current Default Settings
 
 | Parameter | Default Value | Location |
@@ -82,14 +22,15 @@ Stage 2 (Package Creation) uses semantic clustering to group similar deals, then
 - **Clusters created**: 46
 - **Packages produced**: ~174 (includes ~3 "Excluded Deals" packages)
 - **Average packages per cluster**: ~3.8
-- **Note**: "Excluded Deals" packages are included in Stage 2 but skipped in Stage 3
 
-## How Clustering Affects Package Count
+---
+
+## How Clustering Works
 
 ### The Process
 
-1. **Semantic Embeddings**: Each deal is converted to a vector representation
-2. **Clustering**: Deals are grouped by similarity (GMM clustering)
+1. **Semantic Embeddings**: Each deal is converted to a vector representation using sentence transformers
+2. **Clustering**: Deals are grouped by similarity using Gaussian Mixture Model (GMM) clustering
 3. **LLM Processing**: Each cluster is sent to the LLM to propose packages
 4. **Package Output**: Each cluster typically produces 1-5 packages
 
@@ -99,6 +40,12 @@ Stage 2 (Package Creation) uses semantic clustering to group similar deals, then
 - **Fewer packages** = Broader, simpler packages (may miss niche opportunities)
 - **Balance**: Too many packages can be overwhelming; too few may miss valuable segments
 
+### Understanding "Excluded Deals" Packages
+
+Stage 2 creates "Excluded Deals" packages to document deals that couldn't be packaged. These packages have empty `deal_ids` arrays and are automatically skipped in Stage 3. They're included in the package count but don't affect the actual deal packages available to buyers.
+
+---
+
 ## Adjusting Settings to Get More Packages
 
 ### 1. Reduce `max_deals_per_cluster` ⭐ **Most Effective**
@@ -107,6 +54,11 @@ Stage 2 (Package Creation) uses semantic clustering to group similar deals, then
 
 **Current**: 25 deals per cluster  
 **Recommended**: 15-18 deals per cluster
+
+**How it works**:
+- Lower value = More clusters created (deals split into smaller groups)
+- More clusters = More LLM calls = More packages produced
+- Formula: `clusters ≈ total_deals ÷ max_deals_per_cluster`
 
 **Impact**:
 - More clusters created (46 → ~50-60)
@@ -148,6 +100,11 @@ creator = PackageCreator(
 **Current**: 5 deals minimum  
 **Recommended**: 3 deals minimum (if you want more granularity)
 
+**How it works**:
+- Lower value = Allows smaller clusters to be created
+- More small clusters = More total clusters = More packages
+- Deals that would be filtered out can now form clusters
+
 **Impact**:
 - Allows smaller clusters to be created
 - More clusters overall
@@ -176,6 +133,11 @@ creator = PackageCreator(
 
 **Current**: 0.3 (30% probability)  
 **Recommended**: 0.2-0.25 (20-25% probability)
+
+**How it works**:
+- Lower threshold = More deals included per component
+- More deals per component = Potentially more clusters
+- More overlap between clusters (deals can appear in multiple packages)
 
 **Impact**:
 - More deals included per component
@@ -213,6 +175,11 @@ Then update the call in `src/package_creation/creator.py` to pass this parameter
 
 **Recommended**: Manually set to 50-60 components
 
+**How it works**:
+- More components = More potential clusters
+- GMM creates more mixture components = More ways to group deals
+- More packages
+
 **Impact**:
 - More components → More potential clusters
 - More packages
@@ -226,7 +193,65 @@ Then update the call in `src/package_creation/creator.py` to pass this parameter
 
 ---
 
-## Recommended Approach
+## Adjusting Settings to Get Fewer Packages
+
+### 1. Increase `max_deals_per_cluster`
+
+**What it does**: Allows larger clusters before splitting.
+
+**How it works**:
+- Higher value = Fewer clusters created (deals grouped into larger clusters)
+- Fewer clusters = Fewer LLM calls = Fewer packages
+
+**Example**: Change from 25 to 35-40
+- Clusters: 46 → ~20-25
+- Packages: 174 → ~80-100
+
+**Trade-offs**:
+- ✅ Fewer API calls (lower cost/time)
+- ✅ Broader packages
+- ⚠️ Less granular targeting
+
+---
+
+### 2. Increase `min_cluster_size`
+
+**What it does**: Requires more deals to form a cluster.
+
+**How it works**:
+- Higher value = Filters out smaller clusters
+- Fewer clusters = Fewer packages
+
+**Example**: Change from 5 to 8-10
+- Filters out clusters with < 8 deals
+- Reduces total cluster count
+
+**Trade-offs**:
+- ✅ More meaningful clusters
+- ✅ Packages with better inventory scale
+- ⚠️ May miss niche segments
+
+---
+
+### 3. Raise `probability_threshold` (Soft Assignments Only)
+
+**What it does**: Requires higher probability for deal inclusion.
+
+**How it works**:
+- Higher threshold = Fewer deals per component
+- More distinct clusters (less overlap)
+- Potentially fewer total clusters
+
+**Example**: Change from 0.3 to 0.4-0.5
+
+**Trade-offs**:
+- ✅ More distinct clusters
+- ✅ Less overlap between packages
+- ⚠️ May exclude deals that could be valuable
+
+---
+
+## Recommended Approaches
 
 ### For Most Users: Start with `max_deals_per_cluster`
 
@@ -250,6 +275,8 @@ creator = PackageCreator(
 - Packages: 174 → ~200-250
 - Processing time: Slightly longer (more clusters to process)
 
+---
+
 ### For Maximum Packages: Combine Settings
 
 ```python
@@ -268,6 +295,27 @@ creator = PackageCreator(
 - Clusters: 46 → ~55-65
 - Packages: 174 → ~250-300
 - Processing time: Significantly longer
+
+---
+
+### For Fewer Packages: Increase Settings
+
+```python
+creator = PackageCreator(
+    llm_api_key=api_key,
+    prompt_template=prompt_template,
+    model_name=os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash"),
+    clustering_method="gmm",
+    use_soft_assignments=True,
+    max_deals_per_cluster=35,  # Increased
+    min_cluster_size=8          # Increased
+)
+```
+
+**Expected Results**:
+- Clusters: 46 → ~20-25
+- Packages: 174 → ~80-100
+- Processing time: Faster (fewer clusters to process)
 
 ---
 
@@ -352,6 +400,13 @@ After Stage 2 completes:
 - Reduce `min_cluster_size` to 3
 - Expected: ~15-20 clusters → ~50-70 packages
 
+**To get fewer packages**:
+- Increase `max_deals_per_cluster` to 30-35
+- Increase `min_cluster_size` to 8
+- Expected: ~5-7 clusters → ~15-25 packages
+
+---
+
 ### Scenario 2: Large Dataset (2000 deals)
 
 **Default settings**:
@@ -362,7 +417,13 @@ After Stage 2 completes:
 - Reduce `max_deals_per_cluster` to 15-18
 - Expected: ~110-130 clusters → ~400-500 packages
 
+**To get fewer packages**:
+- Increase `max_deals_per_cluster` to 40-50
+- Expected: ~40-50 clusters → ~150-200 packages
+
 **Note**: With large datasets, consider processing in batches or using more aggressive clustering settings.
+
+---
 
 ### Scenario 3: Need Maximum Granularity
 
@@ -376,6 +437,21 @@ After Stage 2 completes:
 - Maximum package count
 - Longer processing time
 - Higher API costs
+
+---
+
+### Scenario 4: Need Broad Packages
+
+**Settings**:
+- `max_deals_per_cluster`: 40-50
+- `min_cluster_size`: 10
+- `probability_threshold`: 0.4
+
+**Expected**:
+- Fewer, larger clusters
+- Broader packages
+- Faster processing
+- Lower API costs
 
 ---
 
@@ -423,198 +499,6 @@ creator = PackageCreator(
 
 ---
 
-## Ensuring Data Integrity: All Packages in Both Sheets
-
-**Important Note**: If Stage 3 has fewer packages than Stage 2, this may be **expected** if "Excluded Deals" packages exist. These packages are intentionally skipped in Stage 3 (see "Excluded Deals Packages in Stage 2" section above).
-
-After running Stages 2-3, you need to verify that all packages from Stage 2 appear in both the "Packages" and "Packages Enriched" worksheets.
-
-### Understanding the Two Worksheets
-
-1. **"Packages" Worksheet** (Stage 2 output):
-   - Contains raw packages created from clusters
-   - Includes: `package_name`, `deal_ids`, `reasoning`
-   - Created incrementally during Stage 2
-
-2. **"Packages Enriched" Worksheet** (Stage 3 output):
-   - Contains enriched packages with aggregated metadata
-   - Includes: taxonomy, safety, audience, commercial data, recommendations
-   - Created incrementally during Stage 3
-   - **May have fewer packages than Stage 2** if "Excluded Deals" packages exist (these are skipped)
-
-### Verification Steps
-
-#### 1. Count Packages in Each Worksheet
-
-**In Google Sheets**:
-- "Packages" worksheet: Count rows (excluding header) = Stage 2 package count
-- "Packages Enriched" worksheet: Count rows (excluding header) = Stage 3 enriched package count
-
-**Expected**: 
-- If no "Excluded Deals" packages: Both counts should match (e.g., 174 packages in both)
-- If "Excluded Deals" packages exist: Stage 3 count will be lower (e.g., Stage 2: 177, Stage 3: 174)
-
-#### 2. Check for Missing Packages
-
-**Method 1: Compare Package Names**
-```python
-# Quick Python script to compare
-import json
-
-# Load Stage 2 packages
-with open('output/packages_TIMESTAMP.json', 'r') as f:
-    stage2 = json.load(f)
-
-# Load Stage 3 enriched packages
-with open('output/packages_enriched_TIMESTAMP.json', 'r') as f:
-    stage3 = json.load(f)
-
-stage2_names = {p.get('package_name') for p in stage2}
-stage3_names = {p.get('package_name') for p in stage3}
-
-missing_in_stage3 = stage2_names - stage3_names
-if missing_in_stage3:
-    print(f"Missing {len(missing_in_stage3)} packages in Stage 3:")
-    for name in missing_in_stage3:
-        print(f"  - {name}")
-else:
-    print("✅ All packages present in Stage 3")
-```
-
-**Method 2: Check Google Sheets Directly**
-- Sort both worksheets by `package_name`
-- Compare row-by-row
-- Look for gaps or missing entries
-
-#### 3. Common Causes of Mismatches
-
-**Stage 3 Interruption**:
-- If Stage 3 was interrupted (e.g., KeyboardInterrupt), some packages may not be enriched
-- **Solution**: Resume Stage 3 - it will skip already-enriched packages and continue
-
-**LLM Failures**:
-- If a package enrichment fails (LLM timeout/error), that package won't appear in Stage 3
-- **Solution**: Check logs for errors, then resume Stage 3
-
-**Checkpoint Issues**:
-- If checkpoint is corrupted or missing, Stage 3 may skip packages
-- **Solution**: Delete checkpoint and re-run Stage 3 (or manually fix checkpoint)
-
-### How to Fix Missing Packages
-
-**Note**: If you see fewer packages in Stage 3 than Stage 2, check if the difference is due to "Excluded Deals" packages (see section above). These are **expected** to be missing from Stage 3.
-
-#### Option 1: Resume Stage 3 (Recommended)
-
-If Stage 3 was interrupted, simply re-run the same command:
-
-```bash
-python -m src.deal_extractor --stage-3 output/packages_TIMESTAMP.json output/deals_enriched_TIMESTAMP.jsonl
-```
-
-The checkpoint system will:
-- Load existing checkpoint
-- Skip packages 1-142 (already enriched)
-- Continue from package 143 onwards
-- Export missing packages incrementally
-
-#### Option 2: Re-run Stage 3 from Scratch
-
-If you want to re-enrich all packages:
-
-```bash
-python -m src.deal_extractor --stage-3 output/packages_TIMESTAMP.json output/deals_enriched_TIMESTAMP.jsonl --no-resume
-```
-
-**Warning**: This will re-process all packages (costs more API calls and time)
-
-#### Option 3: Manual Verification Script
-
-Create a script to identify and re-enrich missing packages:
-
-```python
-import json
-from pathlib import Path
-
-# Load packages
-stage2_path = Path('output/packages_TIMESTAMP.json')
-stage3_path = Path('output/packages_enriched_TIMESTAMP.json')
-
-with open(stage2_path, 'r') as f:
-    stage2_packages = json.load(f)
-
-with open(stage3_path, 'r') as f:
-    stage3_packages = json.load(f)
-
-# Find missing
-stage2_names = {p.get('package_name'): p for p in stage2_packages}
-stage3_names = {p.get('package_name') for p in stage3_packages}
-
-missing = [p for name, p in stage2_names.items() if name not in stage3_names]
-
-if missing:
-    print(f"Found {len(missing)} missing packages")
-    # You can then manually enrich these or re-run Stage 3
-else:
-    print("✅ All packages accounted for")
-```
-
-### Ensuring Complete Data Export
-
-#### Check Incremental Export Status
-
-**Stage 2 Checkpoint**:
-- File: `output/package_creation_checkpoint_TIMESTAMP.json`
-- Shows which clusters were processed
-- If all clusters processed → All packages created
-
-**Stage 3 Checkpoint**:
-- File: `output/package_enrichment_checkpoint_TIMESTAMP.json`
-- Shows which packages were enriched
-- Compare count with Stage 2 package count
-
-#### Verify File Counts Match Sheet Counts
-
-```bash
-# Count packages in JSON file
-python3 -c "import json; data = json.load(open('output/packages_TIMESTAMP.json')); print(f'Stage 2: {len(data)} packages')"
-
-# Count packages in JSONL file (should match)
-wc -l output/packages_TIMESTAMP.jsonl
-
-# Count enriched packages
-python3 -c "import json; data = json.load(open('output/packages_enriched_TIMESTAMP.json')); print(f'Stage 3: {len(data)} packages')"
-```
-
-**Expected**: All counts should match
-
-### Best Practices for Data Integrity
-
-1. **Always check counts after completion**:
-   - Stage 2 packages count = Stage 3 enriched packages count
-   - File counts = Google Sheets row counts
-
-2. **Use incremental export**:
-   - Packages appear in sheets as they're created
-   - Easy to monitor progress
-   - Can resume if interrupted
-
-3. **Keep checkpoints**:
-   - Don't delete checkpoint files until verification complete
-   - Checkpoints enable resume capability
-
-4. **Verify before proceeding**:
-   - Check package counts match
-   - Spot-check a few package names
-   - Verify `deal_ids` are present (once fixed)
-
-5. **Document discrepancies**:
-   - If counts don't match, note which packages are missing
-   - Check logs for errors
-   - Re-run Stage 3 if needed
-
----
-
 ## Summary
 
 **To get more packages**:
@@ -622,4 +506,9 @@ python3 -c "import json; data = json.load(open('output/packages_enriched_TIMESTA
 2. Reduce `min_cluster_size` (3 instead of 5) - For more granularity
 3. Lower `probability_threshold` (0.2 instead of 0.3) - For soft assignments
 
-**Remember**: More packages = More API calls = More cost/time, but better granularity for buyers.
+**To get fewer packages**:
+1. ⭐ **Increase `max_deals_per_cluster`** (35-40 instead of 25) - Most effective
+2. Increase `min_cluster_size` (8-10 instead of 5) - Filters small clusters
+3. Raise `probability_threshold` (0.4-0.5 instead of 0.3) - For soft assignments
+
+**Remember**: More packages = More API calls = More cost/time, but better granularity for buyers. Fewer packages = Faster processing and lower costs, but less granular targeting.
