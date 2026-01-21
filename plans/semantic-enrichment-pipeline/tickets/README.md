@@ -31,8 +31,6 @@ This directory contains detailed implementation tickets for the Semantic Enrichm
 - DEAL-303: Stage 2 → Stage 3 Integration
 - DEAL-304: Delta Detection & Incremental Processing
 - DEAL-305: North Star Naming Taxonomy
-- DEAL-401: Device Type Schema Enhancement & Microsoft Curated Ingestion
-- DEAL-401: Device Type Schema Enhancement & Microsoft Curated Ingestion
 
 **Note:** Stage 1.5 (Real-Time Verification) is **deferred until after Stage 2 (Package Creation) is operational**. This allows us to focus on completing the essential pipeline (Stage 0→1→2→3) before adding verification enhancements. Stage 1.5 will be implemented in Phase 4.
 
