@@ -23,7 +23,7 @@ This misalignment prevents proper clustering and package naming that matches ind
 
 ## Tickets
 
-- **DEAL-401**: Device Type Schema Enhancement & Microsoft Curated Ingestion
+- **DTE-001**: Device Type Schema Enhancement & Microsoft Curated Ingestion
 
 ## Related Documentation
 

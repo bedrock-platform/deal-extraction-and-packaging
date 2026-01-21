@@ -4,7 +4,7 @@ This directory contains implementation tickets for the Device Type Enhancement p
 
 ## Tickets
 
-- **DEAL-401**: Device Type Schema Enhancement & Microsoft Curated Ingestion
+- **DTE-001**: Device Type Schema Enhancement & Microsoft Curated Ingestion
 
 ## Ticket Status
 

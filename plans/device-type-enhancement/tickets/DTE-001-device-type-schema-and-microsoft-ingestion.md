@@ -1,10 +1,9 @@
-# Ticket DEAL-401: Device Type Schema Enhancement & Microsoft Curated Ingestion
+# Ticket DTE-001: Device Type Schema Enhancement & Microsoft Curated Ingestion
 
-**Ticket ID:** DEAL-401  
+**Ticket ID:** DTE-001  
 **Title:** Add Device Type Field to Unified Schema & Ingest Microsoft Curated Inventory  
 **Status:** TODO  
 **Priority:** HIGH  
-**Phase:** Phase 3 (Stage 2 & 3 Integration)  
 **Created:** January 2026  
 **Assigned To:** Development Team
 
